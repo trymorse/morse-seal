@@ -84,13 +84,13 @@ You can also set `OPENAI_BASE_URL=http://127.0.0.1:4141/v1` instead of passing `
 | Flag | Default | What it does |
 | --- | --- | --- |
 | `--key` | `$MORSE_API_KEY` | Your `sk_` key. It goes on the outer request only. |
-| `--floor` | none | The lowest privacy tier a chat may use: `anon`, `private`, or `tee`. The sidecar sets `provider.min_privacy` inside the seal on every chat request that does not set it. A model below the floor gets `400 privacy_floor_unmet`. |
+| `--floor` | none | The lowest privacy tier a chat may use: `anon`, `private`, or `tee`. The sidecar sets `provider.min_privacy` inside the seal on every chat request that does not set it. A model below the floor gets `400 privacy_floor_unmet`. The floor applies only to `POST /v1/chat/completions` and `POST /v1/chat/compact`, so with `--floor` set the sidecar answers every other content route, such as `/v1/messages`, `/v1/responses`, images, and search, with `400 floor_unsupported_route` rather than send it without the floor. Run a sidecar without `--floor` for those routes. |
 | `--privacy-veil` | off | Ask for the Privacy Veil inside the seal on every chat request, so the enclave replaces the personal details in your messages with placeholders before the model's vendor reads them, and puts them back in the reply. A chat that sets `privacy_veil: false` gets `400 privacy_veil_required`, and other content routes and E2EE chats get `400 privacy_veil_not_applicable`. A reply the enclave did not mark `X-Privacy-Veil: applied` is withheld as `502 privacy_veil_missing`. Without the flag, a chat body's own `privacy_veil` still goes inside the seal. |
 | `--listen` | `127.0.0.1:4141` | The address to serve the OpenAI API on. |
 | `--pins-commit` | `main` of `morse-pins` | The `morse-pins` commit whose `enclave_pins.json` to trust, as a 40-character SHA. The commit must be in the history of `main`, or the sidecar does not start. The list stays at that commit until you change the flag. |
 | `--pins` | none | A local `enclave_pins.json` to trust in place of `morse-pins`. You cannot pass it with `--pins-commit`. |
 | `--source` | `https://github.com/trymorse/morse-enclave` | The repository whose tags publish the source of each pinned image. |
-| `--upstream` | `https://api.trymorse.ai` | The Morse API. |
+| `--upstream` | `https://inference.trymorse.ai` | The Morse API. `https://api.trymorse.ai` refuses every `sk_` key with `403 use_inference_door`, so do not point the sidecar there. |
 | `--env` | `prod` | The environment that the attestation documents and the pins must name: `prod` or `dev`. |
 | `--dev` | off | Accept a Morse server that runs outside an enclave. Use it only for local development against a dev server. |
 

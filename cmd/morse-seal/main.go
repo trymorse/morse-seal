@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	defaultUpstream = "https://api.trymorse.ai"
+	defaultUpstream = "https://inference.trymorse.ai"
 	defaultPinsRepo = "https://github.com/trymorse/morse-pins"
 	defaultPinsRaw  = "https://raw.githubusercontent.com/trymorse/morse-pins"
 	defaultPinsAPI  = "https://api.github.com/repos/trymorse/morse-pins"

@@ -346,7 +346,7 @@ func TestConfigureRefusesBadFlags(t *testing.T) {
 			t.Errorf("%s: %v", name, err)
 		}
 	}
-	u, _ := url.Parse("https://api.trymorse.ai")
+	u, _ := url.Parse(defaultUpstream)
 	s, err := configure(options{upstream: u.String(), key: "sk", pins: pins, env: "prod", floor: "tee"})
 	if err != nil || s.floor != "tee" || s.trust.standIns {
 		t.Fatalf("%+v %v", s, err)
@@ -615,5 +615,11 @@ func TestAReplyTheEnclaveDidNotVeilIsWithheld(t *testing.T) {
 	plain := startSidecar(t, relayServer.URL, "dev", "", true)
 	if resp, body := post(t, plain.URL, "/v1/chat/completions", chat); resp.StatusCode != 200 {
 		t.Fatalf("a chat that asked for no Veil: %d %s", resp.StatusCode, body)
+	}
+}
+
+func TestTheDefaultUpstreamIsTheInferenceDoor(t *testing.T) {
+	if defaultUpstream != "https://inference.trymorse.ai" {
+		t.Errorf("--upstream defaults to %q, but prod refuses sk_ keys anywhere but https://inference.trymorse.ai", defaultUpstream)
 	}
 }

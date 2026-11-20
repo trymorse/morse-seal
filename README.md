@@ -8,7 +8,7 @@ You keep your OpenAI SDK and your code. You change the base URL.
 
 ## Install
 
-Install with Go 1.27.3 or later:
+Install with Go 1.27.4 or later:
 
 ```sh
 go install github.com/trymorse/morse-seal/cmd/morse-seal@latest

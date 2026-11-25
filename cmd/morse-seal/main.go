@@ -42,11 +42,23 @@ type options struct {
 	source                            string
 }
 
+// why: flag prints each flag's default, read from its Value's String, in -h and after an unknown flag, so a
+// StringVar whose default is os.Getenv of a key prints the key. internal/cli holds the same type for e2eechat.
+type unprinted struct{ value *string }
+
+func (unprinted) String() string { return "" }
+
+func (u unprinted) Set(v string) error {
+	*u.value = v
+	return nil
+}
+
 func main() {
 	o := options{pinsRepo: defaultPinsRepo, pinsRaw: defaultPinsRaw, pinsAPI: defaultPinsAPI}
 	flag.StringVar(&o.listen, "listen", defaultListen, "address to serve the OpenAI API on")
 	flag.StringVar(&o.upstream, "upstream", defaultUpstream, "the Morse proxy")
-	flag.StringVar(&o.key, "key", os.Getenv("MORSE_API_KEY"), "sk_ API key, or MORSE_API_KEY")
+	o.key = os.Getenv("MORSE_API_KEY")
+	flag.Var(unprinted{&o.key}, "key", "sk_ API key, or MORSE_API_KEY")
 	flag.StringVar(&o.pins, "pins", "", "a local enclave_pins.json to trust in place of morse-pins")
 	flag.StringVar(&o.pinsCommit, "pins-commit", "", "the morse-pins commit to trust, in place of main")
 	flag.StringVar(&o.source, "source", defaultSource, "the public repository whose tags publish each pinned image's source")

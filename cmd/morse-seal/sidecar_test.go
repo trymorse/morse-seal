@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"flag"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -621,5 +622,19 @@ func TestAReplyTheEnclaveDidNotVeilIsWithheld(t *testing.T) {
 func TestTheDefaultUpstreamIsTheInferenceDoor(t *testing.T) {
 	if defaultUpstream != "https://inference.trymorse.ai" {
 		t.Errorf("--upstream defaults to %q, but prod refuses sk_ keys anywhere but https://inference.trymorse.ai", defaultUpstream)
+	}
+}
+
+func TestTheKeyFlagNeverPrintsItsValueInHelp(t *testing.T) {
+	key := "sk_morse_from_the_environment"
+	var help strings.Builder
+	fs := flag.NewFlagSet("morse-seal", flag.ContinueOnError)
+	fs.SetOutput(&help)
+	fs.Var(unprinted{&key}, "key", "sk_ API key, or MORSE_API_KEY")
+	if err := fs.Parse([]string{"-no-such-flag"}); err == nil || !strings.Contains(help.String(), "-key") || strings.Contains(help.String(), "sk_morse") {
+		t.Errorf("err %v, help %q; want the usage text without the key", err, help.String())
+	}
+	if err := fs.Parse([]string{"-key", "sk_morse_from_the_flag"}); err != nil || key != "sk_morse_from_the_flag" {
+		t.Errorf("-key: key %q, err %v; want the flag's", key, err)
 	}
 }

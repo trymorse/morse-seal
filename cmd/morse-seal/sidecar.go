@@ -256,7 +256,8 @@ func withFloor(body []byte, floor string) ([]byte, error) {
 			return nil, fmt.Errorf("provider: %w", err)
 		}
 	}
-	if _, set := provider["min_privacy"]; set {
+	var asked string
+	if json.Unmarshal(provider["min_privacy"], &asked) == nil && slices.Contains(requestTiers, asked) && slices.Index(requestTiers, asked) >= slices.Index(requestTiers, floor) {
 		return body, nil
 	}
 	provider["min_privacy"], _ = json.Marshal(floor)

@@ -221,29 +221,37 @@ func TestAChatIsSealedWithTheFloorAndItsStreamedReplyOpened(t *testing.T) {
 	}
 }
 
-func TestTheFloorIsNotForcedOverOneTheRequestSets(t *testing.T) {
-	for name, in := range map[string]string{
-		"set":            `{"model":"stub","provider":{"min_privacy":"anon"}}`,
-		"other provider": `{"model":"stub","provider":{}}`,
-		"null provider":  `{"model":"stub","provider":null}`,
-		"no provider":    `{"model":"stub"}`,
+func TestTheFloorHoldsAgainstALowerOneTheRequestSets(t *testing.T) {
+	for name, c := range map[string]struct{ in, want string }{
+		"lower":          {`{"model":"stub","provider":{"min_privacy":"anon"}}`, "tee"},
+		"lower, private": {`{"model":"stub","provider":{"min_privacy":"private","zdr":true}}`, "tee"},
+		"null":           {`{"model":"stub","provider":{"min_privacy":null}}`, "tee"},
+		"no tier":        {`{"model":"stub","provider":{"min_privacy":"TEE "}}`, "tee"},
+		"not a string":   {`{"model":"stub","provider":{"min_privacy":3}}`, "tee"},
+		"same":           {`{"model":"stub","provider":{"min_privacy":"tee"}}`, "tee"},
+		"higher":         {`{"model":"stub","provider":{"min_privacy":"e2ee"}}`, "e2ee"},
+		"other provider": {`{"model":"stub","provider":{}}`, "tee"},
+		"null provider":  {`{"model":"stub","provider":null}`, "tee"},
+		"no provider":    {`{"model":"stub"}`, "tee"},
 	} {
-		out, err := withFloor([]byte(in), "tee")
+		out, err := withFloor([]byte(c.in), "tee")
 		if err != nil {
 			t.Fatal(err)
 		}
 		var fields struct {
 			Model    string
-			Provider map[string]string
+			Provider map[string]any
 		}
 		json.Unmarshal(out, &fields)
-		want := "tee"
-		if name == "set" {
-			want = "anon"
-		}
-		if fields.Model != "stub" || fields.Provider["min_privacy"] != want {
+		if fields.Model != "stub" || fields.Provider["min_privacy"] != c.want {
 			t.Errorf("%s: %s", name, out)
 		}
+		if name == "lower, private" && fields.Provider["zdr"] != true {
+			t.Errorf("%s lost the provider's other fields: %s", name, out)
+		}
+	}
+	if out, _ := withFloor([]byte(`{"model":"stub","provider":{"min_privacy":"tee"}}`), "private"); !strings.Contains(string(out), `"min_privacy":"tee"`) {
+		t.Errorf("a private floor lowered a tee request: %s", out)
 	}
 	if _, err := withFloor([]byte(`[1]`), "tee"); err == nil {
 		t.Error("an array body took a floor")

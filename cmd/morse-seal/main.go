@@ -32,7 +32,10 @@ const (
 	defaultListen   = "127.0.0.1:4141"
 )
 
-var tiers = []string{"anon", "private", "tee"}
+var (
+	tiers        = []string{"anon", "private", "tee"}
+	requestTiers = append(slices.Clone(tiers), "e2ee")
+)
 
 type options struct {
 	upstream, key, env, floor, listen string
@@ -63,7 +66,7 @@ func main() {
 	flag.StringVar(&o.pinsCommit, "pins-commit", "", "the morse-pins commit to trust, in place of main")
 	flag.StringVar(&o.source, "source", defaultSource, "the public repository whose tags publish each pinned image's source")
 	flag.StringVar(&o.env, "env", "prod", "the proxy's environment, prod or dev")
-	flag.StringVar(&o.floor, "floor", "", "provider.min_privacy to set on every chat that sets none, refusing every other content route: "+strings.Join(tiers, ", "))
+	flag.StringVar(&o.floor, "floor", "", "the lowest provider.min_privacy a chat may use, set on a chat that names none or a lower one, refusing every other content route: "+strings.Join(tiers, ", "))
 	flag.BoolVar(&o.privacyVeil, "privacy-veil", false, "ask for the Privacy Veil inside the seal on every chat, refusing every other content route, a chat that says privacy_veil false, and a reply the enclave did not veil")
 	flag.BoolVar(&o.dev, "dev", false, "accept a proxy off an enclave by its stand-in document")
 	flag.Parse()

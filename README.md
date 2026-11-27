@@ -90,7 +90,7 @@ You can also set `OPENAI_BASE_URL=http://127.0.0.1:4141/v1` instead of passing `
 | `--pins-commit` | `main` of `morse-pins` | The `morse-pins` commit whose `enclave_pins.json` to trust, as a 40-character SHA. The commit must be in the history of `main`, or the sidecar does not start. The list stays at that commit until you change the flag. |
 | `--pins` | none | A local `enclave_pins.json` to trust in place of `morse-pins`. You cannot pass it with `--pins-commit`. |
 | `--source` | `https://github.com/trymorse/morse-enclave` | The repository whose tags publish the source of each pinned image. |
-| `--upstream` | `https://inference.trymorse.ai` | The Morse API. `--upstream https://api.morseinference.com` reaches the same door under its second name, which serves only the text models marked uncensored. `https://api.trymorse.ai` refuses every `sk_` key with `403 use_inference_door`, so do not point the sidecar there. |
+| `--upstream` | `https://inference.trymorse.ai` | The Morse API. `--upstream https://api.morseinference.com` reaches the same door under its second name, which serves the text models marked uncensored and a few others its docs list. `https://api.trymorse.ai` refuses every `sk_` key with `403 use_inference_door`, so do not point the sidecar there. |
 | `--env` | `prod` | The environment that the attestation documents and the pins must name: `prod` or `dev`. |
 | `--dev` | off | Accept a Morse server that runs outside an enclave. Use it only for local development against a dev server. |
 
